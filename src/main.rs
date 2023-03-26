@@ -37,14 +37,9 @@ async fn main() -> Result<(), FileError> {
         update_runner_pos(&mut runner_pos, right_limit, left_limit);
         update_obstacles_pos(&mut obstacles, bottom_limit);
 
-        draw_obstacles(runner_size, &mut obstacles);
-        draw_runner(
-            &runner_size,
-            &runner_pos,
-            &mut obstacles,
-            &textures.runner,
-            frame_count,
-        );
+        draw_obstacles(&mut obstacles, &textures.obstacle, frame_count);
+        let collided = did_collide(&runner_pos, &obstacles, &runner_size);
+        draw_runner(&runner_pos, &textures.runner, frame_count, collided);
 
         next_frame().await
     }

@@ -50,38 +50,24 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
     }
 }
 
-pub fn draw_obstacles(runner_size: Vec2, obstacles: &Vec<Vec2>) {
-    let radius = runner_size.x / 2.0;
+pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i32) {
     for obstacle in obstacles {
-        draw_circle(obstacle.x + radius, obstacle.y + radius, radius, RED);
+        let mut params = DrawTextureParams::default();
+        let flipped = frame_count / 20 % 2 == 0;
+        params.flip_x = flipped;
+        draw_texture_ex(*texture, obstacle.x, obstacle.y, WHITE, params);
     }
 }
 
-pub fn draw_runner(
-    runner_size: &Vec2,
-    runner_pos: &Vec2,
-    obstacles: &Vec<Vec2>,
-    texture: &Texture2D,
-    frame_count: i32,
-) {
-    let runner_color = if collided(runner_pos, obstacles, runner_size) {
-        RED
-    } else {
-        WHITE
-    };
+pub fn draw_runner(runner_pos: &Vec2, texture: &Texture2D, frame_count: i32, collided: bool) {
+    let runner_color = if collided { RED } else { WHITE };
     let mut params = DrawTextureParams::default();
     let flipped = frame_count / 20 % 2 == 0;
     params.flip_x = flipped;
-    draw_texture_ex(
-        *texture,
-        runner_pos.x,
-        runner_pos.y,
-        runner_color,
-        params,
-    );
+    draw_texture_ex(*texture, runner_pos.x, runner_pos.y, runner_color, params);
 }
 
-pub fn collided(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {
+pub fn did_collide(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {
     let squared_diameter = size.x * size.x;
     for obstacle in obstacles {
         let distance_x = runner_pos.x - obstacle.x;

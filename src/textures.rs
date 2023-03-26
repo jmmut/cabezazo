@@ -2,11 +2,13 @@ use macroquad::prelude::*;
 
 pub struct Textures {
     pub runner: Texture2D,
+    pub obstacle: Texture2D,
 }
 
 pub async fn load_textures() -> Result<Textures, FileError> {
     Ok(Textures {
         runner: load("runner.png").await?,
+        obstacle: load("obstacle.png").await?,
     })
 }
 
