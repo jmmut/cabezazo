@@ -73,12 +73,12 @@ pub fn draw_runner(runner_size: &Vec2, runner_pos: &Vec2, obstacles: &Vec<Vec2>,
 }
 
 pub fn collided(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {
-    let runner_rect = Rect::new(runner_pos.x, runner_pos.y, size.x, size.y);
+    let squared_diameter = size.x * size.x;
     for obstacle in obstacles {
-        if runner_rect
-            .intersect(Rect::new(obstacle.x, obstacle.y, size.x, size.y))
-            .is_some()
-        {
+        let distance_x = (runner_pos.x - obstacle.x);
+        let distance_y = (runner_pos.y - obstacle.y);
+        let squared_distance = distance_x * distance_x + distance_y * distance_y;
+        if squared_distance < squared_diameter {
             return true;
         }
     }
