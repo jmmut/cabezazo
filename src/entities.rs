@@ -51,8 +51,9 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
 }
 
 pub fn draw_obstacles(runner_size: Vec2, obstacles: &Vec<Vec2>) {
+    let radius = runner_size.x / 2.0;
     for obstacle in obstacles {
-        draw_rectangle(obstacle.x, obstacle.y, runner_size.x, runner_size.y, RED);
+        draw_circle(obstacle.x + radius, obstacle.y + radius, radius, RED);
     }
 }
 

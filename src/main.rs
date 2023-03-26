@@ -27,7 +27,7 @@ async fn main() -> Result<(), FileError> {
     let mut seed = 831435;
     loop {
         increase_frame(&mut frame_count);
-        clear_background(BEIGE);
+        clear_background(LIGHTGRAY);
         if is_key_down(KeyCode::Escape) {
             break;
         }
