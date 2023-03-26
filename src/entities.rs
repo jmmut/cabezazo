@@ -56,19 +56,20 @@ pub fn draw_obstacles(runner_size: Vec2, obstacles: &Vec<Vec2>) {
     }
 }
 
-pub fn draw_runner(runner_size: &Vec2, runner_pos: &Vec2, obstacles: &Vec<Vec2>) {
+pub fn draw_runner(runner_size: &Vec2, runner_pos: &Vec2, obstacles: &Vec<Vec2>, texture: &Texture2D) {
     let runner_color = if collided(runner_pos, obstacles, runner_size) {
         PURPLE
     } else {
         DARKBLUE
     };
-    draw_rectangle(
-        runner_pos.x,
-        runner_pos.y,
-        runner_size.x,
-        runner_size.y,
-        runner_color,
-    );
+    // draw_rectangle(
+    //     runner_pos.x,
+    //     runner_pos.y,
+    //     runner_size.x,
+    //     runner_size.y,
+    //     runner_color,
+    // );
+    draw_texture(*texture, runner_pos.x, runner_pos.y, WHITE);
 }
 
 pub fn collided(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {

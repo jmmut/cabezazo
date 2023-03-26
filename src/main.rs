@@ -1,14 +1,17 @@
 pub mod entities;
+pub mod textures;
 
 use macroquad::prelude::*;
 use entities::*;
+use crate::textures::load_textures;
 
 const DEFAULT_WINDOW_TITLE: &'static str = "Cabezazo";
 const DEFAULT_WINDOW_WIDTH: i32 = 640;
 const DEFAULT_WINDOW_HEIGHT: i32 = 640;
 
 #[macroquad::main(window_conf)]
-async fn main() {
+async fn main() -> Result<(), FileError> {
+    let textures = load_textures().await?;
     let runner_size = Vec2::new(64.0, 64.0);
     let mut runner_pos = Vec2::new(
         screen_width() / 2.0 - runner_size.x / 2.0,
@@ -35,10 +38,11 @@ async fn main() {
         update_obstacles_pos(&mut obstacles, bottom_limit);
 
         draw_obstacles(runner_size, &mut obstacles);
-        draw_runner(&runner_size, &runner_pos, &mut obstacles);
+        draw_runner(&runner_size, &runner_pos, &mut obstacles, &textures.runner);
 
         next_frame().await
     }
+    Ok(())
 }
 
 fn window_conf() -> Conf {
