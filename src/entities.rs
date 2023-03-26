@@ -9,7 +9,7 @@ pub fn maybe_add_obstacles(
     if frame_count % 60 == 0 {
         obstacles.push(Vec2::new(
             (*seed % ((screen_width() - runner_size.x) as i32)) as f32,
-            0.0,
+            -runner_size.y,
         ));
         let microseconds = (get_frame_time() * 1000000.0) as i32;
         *seed = (*seed + microseconds) % 10000;

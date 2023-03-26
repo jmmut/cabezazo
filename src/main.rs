@@ -20,7 +20,7 @@ async fn main() -> Result<(), FileError> {
 
     let mut obstacles = Vec::new();
 
-    let bottom_limit = screen_height() - runner_size.y;
+    let bottom_limit = screen_height();
     let right_limit = screen_width() - runner_size.x;
     let left_limit = 0.0;
     let mut frame_count = 0;
