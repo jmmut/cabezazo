@@ -1,0 +1,115 @@
+name: Deployment to itch.io
+
+on:
+  push:
+    tags: [ "*.*.*" ]
+  
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  deploy-wasm-linux-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install libx11-dev libxi-dev libgl1-mesa-dev gcc-mingw-w64 libasound2-dev
+          # -L follows redirects
+          # -O specifies output name
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          # GNU unzip tends to not set the executable bit even though it's set in the .zip
+          chmod +x butler
+          # just a sanity check run (and also helpful in case you're sharing CI logs)
+          ./butler -V
+
+      - name: Build
+        run: cargo build -r
+
+      - name: Run tests
+        run: cargo test -r
+
+      - name: Package Linux
+        run: |
+          mkdir -p cabezazo_linux
+          cp -r assets/ cabezazo_linux/
+          cp target/release/cabezazo cabezazo_linux/
+          zip -FS -r cabezazo_linux.zip cabezazo_linux/*
+          sha512sum cabezazo_linux.zip
+
+      - name: Deploy Linux to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler push cabezazo_linux.zip jmmut/cabezazo:linux
+
+      - name: Compile and package WebAssembly
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo build -r --target wasm32-unknown-unknown
+          # the folder export_html contains the html wrapper so that the wasm can be used
+          mkdir -p cabezazo_html
+          cp -r export_html/* cabezazo_html/
+          cp -r target/wasm32-unknown-unknown/release/*.wasm cabezazo_html/
+          cp -r assets/ cabezazo_html/
+          zip -FS -r wasm.zip cabezazo_html/*
+          sha512sum wasm.zip
+
+      - name: Deploy WebAssembly to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler push wasm.zip jmmut/cabezazo:html5
+
+      - name: Compile and package Windows
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+          cargo build -r --target x86_64-pc-windows-gnu
+          mkdir -p cabezazo_windows
+          cp -r assets/ cabezazo_windows/
+          cp target/x86_64-pc-windows-gnu/release/cabezazo.exe cabezazo_windows/
+          zip -FS -r cabezazo_windows.zip cabezazo_windows/*
+          sha512sum cabezazo_windows.zip
+
+      - name: Deploy Windows to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler push cabezazo_windows.zip jmmut/cabezazo:windows
+
+  deploy-mac:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        run: |
+          # -L follows redirects
+          # -O specifies output name
+          curl -L -o butler.zip https://broth.itch.ovh/butler/darwin-amd64/LATEST/archive/default
+          unzip butler.zip
+          # GNU unzip tends to not set the executable bit even though it's set in the .zip
+          chmod +x butler
+          # just a sanity check run (and also helpful in case you're sharing CI logs)
+          ./butler -V
+
+      - name: Build
+        run: cargo build -r
+
+      - name: Run tests
+        run: cargo test -r
+
+      - name: Package Mac
+        run: |
+          mkdir -p cabezazo_mac
+          cp -r assets/ cabezazo_mac/
+          cp target/release/cabezazo cabezazo_mac/
+          zip -FS -r cabezazo_mac.zip cabezazo_mac/*
+          # sha512sum cabezazo_mac.zip # error: sha512sum doesn't exist in mac. TODO: Find alternative.
+
+      - name: Deploy Mac to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler push cabezazo_mac.zip jmmut/cabezazo:mac
