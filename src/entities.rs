@@ -35,14 +35,14 @@ pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) {
 pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f32) {
     let delta = get_frame_time();
 
-    if is_key_down(KeyCode::Right) {
+    if is_key_down(KeyCode::Right) || touches_local().iter().any(|t| t.position.x >= 0.0) {
         runner_pos.x += 300.0 * delta;
     }
     if runner_pos.x > right_limit {
         runner_pos.x = right_limit;
     }
 
-    if is_key_down(KeyCode::Left) {
+    if is_key_down(KeyCode::Left) || touches_local().iter().any(|t| t.position.x < 0.0) {
         runner_pos.x -= 300.0 * delta;
     }
     if runner_pos.x < left_limit {
