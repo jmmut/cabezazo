@@ -32,25 +32,48 @@ async fn main() {
         }
 
         update_runner_pos(&mut runner_pos, right_limit, left_limit);
+        update_obstacles(&mut obstacles, bottom_limit);
 
-        draw_rectangle(runner_pos.x, runner_pos.y, runner_size.x, runner_size.y, DARKBLUE);
-        let mut to_remove = Vec::new();
 
-        let delta = get_frame_time();
-        for (i,  obstacle ) in &mut obstacles.iter_mut().enumerate() {
+        for obstacle in &obstacles {
             draw_rectangle(obstacle.x, obstacle.y, runner_size.x, runner_size.y, RED);
-            obstacle.y += 200.0 * delta;
-            if obstacle.y > bottom_limit {
-                to_remove.push(i);
-            }
-        }
-        for i in to_remove {
-            obstacles.remove(i);
         }
 
+        let runner_color = if collided(runner_pos, &obstacles, runner_size) {
+            PURPLE
+        } else {
+            DARKBLUE
+        };
+        draw_rectangle(runner_pos.x, runner_pos.y, runner_size.x, runner_size.y, runner_color);
         next_frame().await
     }
 }
+
+fn collided(runner_pos: Vec2, obstacles: &Vec<Vec2>, size: Vec2) -> bool {
+    let runner_rect = Rect::new(runner_pos.x, runner_pos.y, size.x, size.y);
+    for obstacle in obstacles {
+        if runner_rect.intersect(Rect::new(obstacle.x, obstacle.y, size.x, size.y)).is_some() {
+            return true;
+        }
+    }
+    return false;
+}
+
+fn update_obstacles(obstacles: &mut Vec<Vec2>, bottom_limit: f32) {
+    let mut to_remove = Vec::new();
+
+    let delta = get_frame_time();
+    for (i, obstacle) in &mut obstacles.iter_mut().enumerate() {
+        obstacle.y += 200.0 * delta;
+        if obstacle.y > bottom_limit {
+            to_remove.push(i);
+        }
+    }
+    for i in to_remove {
+        obstacles.remove(i);
+    }
+}
+
 
 fn increase_frame(frame_count :&mut i32) {
     *frame_count += 1;
