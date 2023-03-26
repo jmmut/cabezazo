@@ -13,7 +13,7 @@ pub fn maybe_add_obstacles(
         ));
         let microseconds = (get_frame_time() * 1000000.0) as i32;
         *seed = (*seed + microseconds) % 10000;
-        *seed = *seed * *seed + microseconds % 16 ;
+        *seed = *seed * *seed + microseconds % 16;
     }
 }
 
@@ -57,27 +57,35 @@ pub fn draw_obstacles(runner_size: Vec2, obstacles: &Vec<Vec2>) {
     }
 }
 
-pub fn draw_runner(runner_size: &Vec2, runner_pos: &Vec2, obstacles: &Vec<Vec2>, texture: &Texture2D) {
+pub fn draw_runner(
+    runner_size: &Vec2,
+    runner_pos: &Vec2,
+    obstacles: &Vec<Vec2>,
+    texture: &Texture2D,
+    frame_count: i32,
+) {
     let runner_color = if collided(runner_pos, obstacles, runner_size) {
         RED
     } else {
         WHITE
     };
-    // draw_rectangle(
-    //     runner_pos.x,
-    //     runner_pos.y,
-    //     runner_size.x,
-    //     runner_size.y,
-    //     runner_color,
-    // );
-    draw_texture(*texture, runner_pos.x, runner_pos.y, runner_color);
+    let mut params = DrawTextureParams::default();
+    let flipped = frame_count / 20 % 2 == 0;
+    params.flip_x = flipped;
+    draw_texture_ex(
+        *texture,
+        runner_pos.x,
+        runner_pos.y,
+        runner_color,
+        params,
+    );
 }
 
 pub fn collided(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {
     let squared_diameter = size.x * size.x;
     for obstacle in obstacles {
-        let distance_x = (runner_pos.x - obstacle.x);
-        let distance_y = (runner_pos.y - obstacle.y);
+        let distance_x = runner_pos.x - obstacle.x;
+        let distance_y = runner_pos.y - obstacle.y;
         let squared_distance = distance_x * distance_x + distance_y * distance_y;
         if squared_distance < squared_diameter {
             return true;

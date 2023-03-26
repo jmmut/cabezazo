@@ -1,9 +1,9 @@
 pub mod entities;
 pub mod textures;
 
-use macroquad::prelude::*;
-use entities::*;
 use crate::textures::load_textures;
+use entities::*;
+use macroquad::prelude::*;
 
 const DEFAULT_WINDOW_TITLE: &'static str = "Cabezazo";
 const DEFAULT_WINDOW_WIDTH: i32 = 640;
@@ -38,7 +38,13 @@ async fn main() -> Result<(), FileError> {
         update_obstacles_pos(&mut obstacles, bottom_limit);
 
         draw_obstacles(runner_size, &mut obstacles);
-        draw_runner(&runner_size, &runner_pos, &mut obstacles, &textures.runner);
+        draw_runner(
+            &runner_size,
+            &runner_pos,
+            &mut obstacles,
+            &textures.runner,
+            frame_count,
+        );
 
         next_frame().await
     }

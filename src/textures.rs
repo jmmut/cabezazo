@@ -1,4 +1,3 @@
-use macroquad::miniquad::Texture;
 use macroquad::prelude::*;
 
 pub struct Textures {
@@ -6,7 +5,6 @@ pub struct Textures {
 }
 
 pub async fn load_textures() -> Result<Textures, FileError> {
-    let names = vec!["runner.png"];
     Ok(Textures {
         runner: load("runner.png").await?,
     })
