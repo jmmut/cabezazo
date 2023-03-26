@@ -1,15 +1,16 @@
 use macroquad::prelude::*;
 
-const DEFAULT_WINDOW_TITLE : &'static str = "Cabezazo";
-const DEFAULT_WINDOW_WIDTH : i32 = 640;
-const DEFAULT_WINDOW_HEIGHT : i32 = 640;
-
+const DEFAULT_WINDOW_TITLE: &'static str = "Cabezazo";
+const DEFAULT_WINDOW_WIDTH: i32 = 640;
+const DEFAULT_WINDOW_HEIGHT: i32 = 640;
 
 #[macroquad::main(window_conf)]
 async fn main() {
-
     let runner_size = Vec2::new(64.0, 64.0);
-    let mut runner_pos = Vec2::new(screen_width()/2.0 - runner_size.x/2.0, screen_height() - runner_size.y);
+    let mut runner_pos = Vec2::new(
+        screen_width() / 2.0 - runner_size.x / 2.0,
+        screen_height() - runner_size.y,
+    );
 
     let mut obstacles = Vec::new();
 
@@ -25,15 +26,17 @@ async fn main() {
             break;
         }
 
-        if frame_count %60 ==0 {
-            obstacles.push(Vec2::new((seed % ((screen_width() - runner_size.x) as i32)) as f32, 0.0));
+        if frame_count % 60 == 0 {
+            obstacles.push(Vec2::new(
+                (seed % ((screen_width() - runner_size.x) as i32)) as f32,
+                0.0,
+            ));
             seed = (seed + (get_frame_time() * 1000000.0) as i32) % 10000;
             seed = seed * seed;
         }
 
         update_runner_pos(&mut runner_pos, right_limit, left_limit);
         update_obstacles(&mut obstacles, bottom_limit);
-
 
         for obstacle in &obstacles {
             draw_rectangle(obstacle.x, obstacle.y, runner_size.x, runner_size.y, RED);
@@ -44,7 +47,13 @@ async fn main() {
         } else {
             DARKBLUE
         };
-        draw_rectangle(runner_pos.x, runner_pos.y, runner_size.x, runner_size.y, runner_color);
+        draw_rectangle(
+            runner_pos.x,
+            runner_pos.y,
+            runner_size.x,
+            runner_size.y,
+            runner_color,
+        );
         next_frame().await
     }
 }
@@ -52,7 +61,10 @@ async fn main() {
 fn collided(runner_pos: Vec2, obstacles: &Vec<Vec2>, size: Vec2) -> bool {
     let runner_rect = Rect::new(runner_pos.x, runner_pos.y, size.x, size.y);
     for obstacle in obstacles {
-        if runner_rect.intersect(Rect::new(obstacle.x, obstacle.y, size.x, size.y)).is_some() {
+        if runner_rect
+            .intersect(Rect::new(obstacle.x, obstacle.y, size.x, size.y))
+            .is_some()
+        {
             return true;
         }
     }
@@ -74,10 +86,9 @@ fn update_obstacles(obstacles: &mut Vec<Vec2>, bottom_limit: f32) {
     }
 }
 
-
-fn increase_frame(frame_count :&mut i32) {
+fn increase_frame(frame_count: &mut i32) {
     *frame_count += 1;
-    const MAX_FRAME :i32 = 10000;
+    const MAX_FRAME: i32 = 10000;
     if *frame_count > MAX_FRAME {
         *frame_count -= MAX_FRAME;
     }
