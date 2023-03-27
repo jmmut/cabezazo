@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use crate::textures::Textures;
 
 pub fn maybe_add_obstacles(
     runner_size: Vec2,
@@ -17,7 +18,7 @@ pub fn maybe_add_obstacles(
     }
 }
 
-pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) {
+pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) -> usize {
     let mut to_remove = Vec::new();
 
     let delta = get_frame_time();
@@ -27,9 +28,11 @@ pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) {
             to_remove.push(i);
         }
     }
+    let obstacles_passed = to_remove.len();
     for i in to_remove {
         obstacles.remove(i);
     }
+    obstacles_passed
 }
 
 pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f32) {
@@ -59,11 +62,17 @@ pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i
     }
 }
 
-pub fn draw_runner(runner_pos: &Vec2, texture: &Texture2D, frame_count: i32, collided: bool) {
+pub fn draw_runner(runner_pos: &Vec2, textures: &Textures, frame_count: i32, collided: bool, runner_lives: i32) {
     let runner_color = if collided { RED } else { WHITE };
     let mut params = DrawTextureParams::default();
     let flipped = frame_count / 20 % 2 == 0;
     params.flip_x = flipped;
+    let texture = match runner_lives {
+        3 => &textures.runner,
+        2 => &textures.runner_scratched,
+        1 | 0 => &textures.runner_dying,
+        _ => unreachable!(),
+    };
     draw_texture_ex(*texture, runner_pos.x, runner_pos.y, runner_color, params);
 }
 
