@@ -9,7 +9,7 @@ pub fn maybe_add_obstacles(
     difficulty: i32,
 ) {
     if frame_count % difficulty == 0 {
-        eprintln!("added obstacle. current difficulty is {}", difficulty);
+        //eprintln!("added obstacle. current difficulty is {}", difficulty);
         obstacles.push(Vec2::new(
             (*seed % ((screen_width() + runner_size.x) as i32)) as f32 - runner_size.x,
             -runner_size.y,
