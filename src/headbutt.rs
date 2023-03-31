@@ -3,7 +3,7 @@ const HEADBUTT_SECONDS: f32 = 0.2;
 const HEADBUTT_BACK_SECONDS: f32 = 0.8;
 const HEADBUTT_REST_SECONDS: f32 = 2.0;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum HeadbuttStage {
     None,
     Hitting,
@@ -77,14 +77,14 @@ mod tests {
     fn test_max_pos() {
         let mut headbutt = Headbutt::new();
         headbutt.start();
-        assert_eq!(headbutt.in_progress, true);
+        assert_eq!(headbutt.stage, HeadbuttStage::Hitting);
         let mut max_pos: f32 = 0.0;
         let delta = 0.01;
         for _ in 0..=(((HEADBUTT_SECONDS + HEADBUTT_BACK_SECONDS) / delta) as i32) {
             headbutt.update(delta);
             max_pos = max_pos.max(headbutt.pos());
         }
-        assert_eq!(headbutt.in_progress, false);
+        assert_eq!(headbutt.stage, HeadbuttStage::Resting);
         assert_eq!(max_pos, MAX_HEADBUTT_MOVEMENT)
     }
 
@@ -92,28 +92,28 @@ mod tests {
     fn test_min_pos() {
         let mut headbutt = Headbutt::new();
         headbutt.start();
-        assert_eq!(headbutt.in_progress, true);
+        assert_eq!(headbutt.stage, HeadbuttStage::Hitting);
         let mut min_pos: f32 = MAX_HEADBUTT_MOVEMENT;
         let delta = 0.01;
         for _ in 0..=(((HEADBUTT_SECONDS + HEADBUTT_BACK_SECONDS) / delta) as i32) {
             min_pos = min_pos.min(headbutt.pos());
             headbutt.update(0.01);
         }
-        assert_eq!(headbutt.in_progress, false);
+        assert_eq!(headbutt.stage, HeadbuttStage::Resting);
         assert_eq!(min_pos, 0.0)
     }
 
     #[test]
     fn test_start() {
         let mut headbutt = Headbutt::new();
-        assert_eq!(headbutt.in_progress, false);
+        assert_eq!(headbutt.stage, HeadbuttStage::None);
         let mut max_pos: f32 = 0.0;
         let delta = 0.01;
         for _ in 0..=(((HEADBUTT_SECONDS + HEADBUTT_BACK_SECONDS) / delta) as i32) {
             headbutt.update(delta);
             max_pos = max_pos.max(headbutt.pos());
         }
-        assert_eq!(headbutt.in_progress, false);
+        assert_eq!(headbutt.stage, HeadbuttStage::None);
         assert_eq!(max_pos, 0.0)
     }
 }
