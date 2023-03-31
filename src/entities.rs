@@ -8,7 +8,6 @@ pub fn maybe_add_obstacles(
     seed: &mut i32,
     difficulty: i32,
 ) {
-
     if frame_count % difficulty == 0 {
         eprintln!("added obstacle. current difficulty is {}", difficulty);
         obstacles.push(Vec2::new(

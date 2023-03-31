@@ -40,7 +40,13 @@ async fn main() -> Result<(), FileError> {
     loop {
         if runner_lives > 0 {
             increase_frame(&mut frame_count, &mut difficulty, &mut difficulty_progress);
-            maybe_add_obstacles(runner_size, &mut obstacles, frame_count, &mut seed, difficulty);
+            maybe_add_obstacles(
+                runner_size,
+                &mut obstacles,
+                frame_count,
+                &mut seed,
+                difficulty,
+            );
             if should_headbutt(previous_collided) {
                 headbutt.start();
             }
