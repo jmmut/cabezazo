@@ -12,12 +12,15 @@ pub fn maybe_add_obstacles(
     if frame_count % difficulty == 0 {
         eprintln!("added obstacle. current difficulty is {}", difficulty);
         obstacles.push(Vec2::new(
-            (*seed % ((screen_width() - runner_size.x) as i32)) as f32,
+            (*seed % ((screen_width() + runner_size.x) as i32)) as f32 - runner_size.x,
             -runner_size.y,
         ));
-        let microseconds = (get_frame_time() * 1000000.0) as i32;
-        *seed = (*seed + microseconds) % 10000;
-        *seed = *seed * *seed + microseconds % 16;
+        let microseconds = (get_frame_time() * 1_000_000.0) as i32;
+        *seed *= 39;
+        *seed += microseconds;
+        if *seed > 1_000_000 {
+            *seed = *seed % 1_000_000;
+        }
     }
 }
 
