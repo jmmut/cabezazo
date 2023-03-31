@@ -80,6 +80,7 @@ pub fn draw_runner(
     frame_count: i32,
     collided: bool,
     runner_lives: i32,
+    stamina: f32,
 ) {
     let runner_color = if collided { RED } else { WHITE };
     let mut params = DrawTextureParams::default();
@@ -92,6 +93,25 @@ pub fn draw_runner(
         _ => unreachable!(),
     };
     draw_texture_ex(*texture, runner_pos.x, runner_pos.y, runner_color, params);
+
+    if stamina < 1.0 {
+        let stamina_height: f32 = 20.0;
+        draw_rectangle_lines(
+            runner_pos.x,
+            runner_pos.y - stamina_height * 2.0,
+            texture.width(),
+            stamina_height,
+            2.0,
+            BLACK,
+        );
+        draw_rectangle(
+            runner_pos.x + 1.0,
+            runner_pos.y - stamina_height * 2.0 + 1.0,
+            (texture.width() - 2.0) * stamina,
+            stamina_height - 2.0,
+            VIOLET,
+        );
+    }
 }
 
 pub fn did_collide(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> (bool, usize) {

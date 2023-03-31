@@ -67,7 +67,14 @@ async fn main() -> Result<(), FileError> {
             runner_lives -= 1; // decrease life after finishing collision, so that users sees the collision
         }
         previous_collided = collided;
-        draw_runner(&runner_pos, &textures, frame_count, collided, runner_lives);
+        draw_runner(
+            &runner_pos,
+            &textures,
+            frame_count,
+            collided,
+            runner_lives,
+            headbutt.stamina(),
+        );
         next_frame().await
     }
     Ok(())

@@ -58,6 +58,15 @@ impl Headbutt {
             }
         }
     }
+    pub fn stamina(&self) -> f32 {
+        return if self.stage == HeadbuttStage::None {
+            1.0
+        } else {
+            let rest = self.seconds_since_start - (HEADBUTT_SECONDS + HEADBUTT_BACK_SECONDS);
+            let rest_coef = rest / HEADBUTT_REST_SECONDS;
+            rest_coef.max(0.0)
+        };
+    }
 }
 
 #[cfg(test)]
