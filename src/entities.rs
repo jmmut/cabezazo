@@ -6,8 +6,11 @@ pub fn maybe_add_obstacles(
     obstacles: &mut Vec<Vec2>,
     frame_count: i32,
     seed: &mut i32,
+    difficulty: i32,
 ) {
-    if frame_count % 60 == 0 {
+
+    if frame_count % difficulty == 0 {
+        eprintln!("added obstacle. current difficulty is {}", difficulty);
         obstacles.push(Vec2::new(
             (*seed % ((screen_width() - runner_size.x) as i32)) as f32,
             -runner_size.y,
@@ -66,7 +69,7 @@ pub fn should_headbutt(collided: bool) -> bool {
 }
 
 pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i32) {
-    for obstacle in obstacles {
+    for obstacle in obstacles.iter().rev() {
         let mut params = DrawTextureParams::default();
         let flipped = frame_count / 20 % 2 == 0;
         params.flip_x = flipped;

@@ -33,10 +33,11 @@ async fn main() -> Result<(), FileError> {
     let mut previous_collided = false;
     let mut obstacles_passed = 0;
     let mut headbutt = Headbutt::new();
+    let mut difficulty = 60;
     loop {
         if runner_lives > 0 {
-            increase_frame(&mut frame_count);
-            maybe_add_obstacles(runner_size, &mut obstacles, frame_count, &mut seed);
+            increase_frame(&mut frame_count, &mut difficulty);
+            maybe_add_obstacles(runner_size, &mut obstacles, frame_count, &mut seed, difficulty);
             if should_headbutt(previous_collided) {
                 headbutt.start();
             }
@@ -89,9 +90,12 @@ fn window_conf() -> Conf {
     }
 }
 
-fn increase_frame(frame_count: &mut i32) {
+fn increase_frame(frame_count: &mut i32, difficulty: &mut i32) {
     *frame_count += 1;
     const MAX_FRAME: i32 = 10000;
+    if *frame_count % 100 == 0 {
+        *difficulty = 1.max(*difficulty - 1);
+    }
     if *frame_count > MAX_FRAME {
         *frame_count -= MAX_FRAME;
     }
