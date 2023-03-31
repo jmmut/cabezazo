@@ -1,5 +1,5 @@
-use macroquad::prelude::*;
 use crate::textures::Textures;
+use macroquad::prelude::*;
 
 pub fn maybe_add_obstacles(
     runner_size: Vec2,
@@ -38,19 +38,31 @@ pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) -> usi
 pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f32) {
     let delta = get_frame_time();
 
-    if is_key_down(KeyCode::Right) || touches_local().iter().any(|t| t.position.x >= 0.0) {
+    if is_key_down(KeyCode::Right)
+        || touches_local()
+            .iter()
+            .any(|t| t.position.y >= 0.0 && t.position.x >= 0.0)
+    {
         runner_pos.x += 300.0 * delta;
     }
     if runner_pos.x > right_limit {
         runner_pos.x = right_limit;
     }
 
-    if is_key_down(KeyCode::Left) || touches_local().iter().any(|t| t.position.x < 0.0) {
+    if is_key_down(KeyCode::Left)
+        || touches_local()
+            .iter()
+            .any(|t| t.position.y >= 0.0 && t.position.x < 0.0)
+    {
         runner_pos.x -= 300.0 * delta;
     }
     if runner_pos.x < left_limit {
         runner_pos.x = left_limit;
     }
+}
+
+pub fn should_headbutt(collided: bool) -> bool {
+    !collided && (is_key_down(KeyCode::Up) || touches_local().iter().any(|t| t.position.y < 0.0))
 }
 
 pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i32) {
@@ -62,7 +74,13 @@ pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i
     }
 }
 
-pub fn draw_runner(runner_pos: &Vec2, textures: &Textures, frame_count: i32, collided: bool, runner_lives: i32) {
+pub fn draw_runner(
+    runner_pos: &Vec2,
+    textures: &Textures,
+    frame_count: i32,
+    collided: bool,
+    runner_lives: i32,
+) {
     let runner_color = if collided { RED } else { WHITE };
     let mut params = DrawTextureParams::default();
     let flipped = frame_count / 20 % 2 == 0;
@@ -76,15 +94,15 @@ pub fn draw_runner(runner_pos: &Vec2, textures: &Textures, frame_count: i32, col
     draw_texture_ex(*texture, runner_pos.x, runner_pos.y, runner_color, params);
 }
 
-pub fn did_collide(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> bool {
+pub fn did_collide(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> (bool, usize) {
     let squared_diameter = size.x * size.x;
-    for obstacle in obstacles {
+    for (i, obstacle) in obstacles.iter().enumerate() {
         let distance_x = runner_pos.x - obstacle.x;
         let distance_y = runner_pos.y - obstacle.y;
         let squared_distance = distance_x * distance_x + distance_y * distance_y;
         if squared_distance < squared_diameter {
-            return true;
+            return (true, i);
         }
     }
-    return false;
+    return (false, 0);
 }

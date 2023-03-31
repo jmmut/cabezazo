@@ -1,6 +1,8 @@
 pub mod entities;
+mod headbutt;
 pub mod textures;
 
+use crate::headbutt::{Headbutt, HeadbuttStage};
 use crate::textures::load_textures;
 use entities::*;
 use macroquad::prelude::*;
@@ -30,10 +32,16 @@ async fn main() -> Result<(), FileError> {
     let mut seed = 831435;
     let mut previous_collided = false;
     let mut obstacles_passed = 0;
+    let mut headbutt = Headbutt::new();
     loop {
         if runner_lives > 0 {
             increase_frame(&mut frame_count);
             maybe_add_obstacles(runner_size, &mut obstacles, frame_count, &mut seed);
+            if should_headbutt(previous_collided) {
+                headbutt.start();
+            }
+            headbutt.update(get_frame_time());
+            runner_pos.y = screen_height() - headbutt.pos() - runner_size.y;
             update_runner_pos(&mut runner_pos, right_limit, left_limit);
             obstacles_passed += update_obstacles_pos(&mut obstacles, bottom_limit);
         } else {
@@ -50,8 +58,12 @@ async fn main() -> Result<(), FileError> {
         }
 
         draw_obstacles(&mut obstacles, &textures.obstacle, frame_count);
-        let collided = did_collide(&runner_pos, &obstacles, &runner_size);
-        if !collided && previous_collided {
+        let (mut collided, obstacle_idx) = did_collide(&runner_pos, &obstacles, &runner_size);
+        if headbutt.stage == HeadbuttStage::Hitting && collided {
+            obstacles.remove(obstacle_idx);
+            collided = false;
+        }
+        if !collided && previous_collided && headbutt.stage != HeadbuttStage::Hitting {
             runner_lives -= 1; // decrease life after finishing collision, so that users sees the collision
         }
         previous_collided = collided;
@@ -81,14 +93,16 @@ fn increase_frame(frame_count: &mut i32) {
 fn draw_game_over(runner_lives: i32, obstacles_passed: usize) -> bool {
     let mut restart = false;
     if runner_lives == 0 {
-        Window::new(1,
-                    Vec2::new(screen_width() / 4.0, screen_height() / 4.0),
-                    Vec2::new(screen_width() / 2.0, screen_height() / 4.0))
-            .label("Game Over")
-            .ui(&mut root_ui(), |ui| {
-                Label::new(format!("You survived {} obstacles!", obstacles_passed)).ui(ui);
-                restart = Button::new("Restart").ui(ui)
-            });
+        Window::new(
+            1,
+            Vec2::new(screen_width() / 4.0, screen_height() / 4.0),
+            Vec2::new(screen_width() / 2.0, screen_height() / 4.0),
+        )
+        .label("Game Over")
+        .ui(&mut root_ui(), |ui| {
+            Label::new(format!("You survived {} obstacles!", obstacles_passed)).ui(ui);
+            restart = Button::new("Restart").ui(ui)
+        });
     }
     restart
 }
