@@ -78,8 +78,9 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
     }
 }
 
-pub fn should_headbutt(collided: bool) -> bool {
+pub fn should_headbutt(collided: bool, previous_restart: bool) -> bool {
     !collided
+        && !previous_restart
         && (is_key_down(KeyCode::Up)
             || touches_local().iter().any(|t| is_click_up(t.position))
             || (is_mouse_button_down(MouseButton::Left) && is_click_up(mouse_position_local())))

@@ -10,7 +10,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::{Button, Label, Window};
 
 const DEFAULT_WINDOW_TITLE: &'static str = "Cabezazo";
-const DEFAULT_WINDOW_WIDTH: i32 = 640;
+const DEFAULT_WINDOW_WIDTH: i32 = 480;
 const DEFAULT_WINDOW_HEIGHT: i32 = 640;
 
 const INITIAL_DIFFICULTY: i32 = 30;
@@ -37,6 +37,7 @@ async fn main() -> Result<(), FileError> {
     let mut headbutt = Headbutt::new();
     let mut difficulty = INITIAL_DIFFICULTY;
     let mut difficulty_progress = 0;
+    let mut previous_restart = false;
     loop {
         if runner_lives > 0 {
             increase_frame(&mut frame_count, &mut difficulty, &mut difficulty_progress);
@@ -47,13 +48,14 @@ async fn main() -> Result<(), FileError> {
                 &mut seed,
                 difficulty,
             );
-            if should_headbutt(previous_collided) {
+            if should_headbutt(previous_collided, previous_restart) {
                 headbutt.start();
             }
             headbutt.update(get_frame_time());
             runner_pos.y = screen_height() - headbutt.pos() - runner_size.y;
             update_runner_pos(&mut runner_pos, right_limit, left_limit);
             obstacles_passed += update_obstacles_pos(&mut obstacles, bottom_limit);
+            previous_restart = false;
         } else {
             if draw_game_over(runner_lives, obstacles_passed) {
                 runner_lives = 3;
@@ -63,6 +65,7 @@ async fn main() -> Result<(), FileError> {
                 headbutt = Headbutt::new();
                 difficulty = INITIAL_DIFFICULTY;
                 difficulty_progress = 0;
+                previous_restart = true;
             }
         }
         clear_background(LIGHTGRAY);
@@ -140,11 +143,12 @@ fn draw_button_overlay() {
     let width = screen_width();
     let height = screen_height();
     let color = Color::new(0.2, 0.2, 0.2, 0.2);
+    let radius = (width / 16.0).min(height / 16.0);
     draw_poly(
         width * 3.0 / 4.0,
         height * 3.0 / 4.0,
         3,
-        width / 16.0,
+        radius,
         0.0,
         // 10.0,
         color,
@@ -154,7 +158,7 @@ fn draw_button_overlay() {
         width * 5.0 / 8.0,
         height * 5.0 / 8.0,
         width / 4.0,
-        width / 4.0,
+        height / 4.0,
         10.0,
         color,
     );
@@ -163,7 +167,7 @@ fn draw_button_overlay() {
         width * 1.0 / 4.0,
         height * 3.0 / 4.0,
         3,
-        width / 16.0,
+        radius,
         180.0,
         // 10.0,
         color,
@@ -173,7 +177,7 @@ fn draw_button_overlay() {
         width * 1.0 / 8.0,
         height * 5.0 / 8.0,
         width / 4.0,
-        width / 4.0,
+        height / 4.0,
         10.0,
         color,
     );
@@ -181,7 +185,7 @@ fn draw_button_overlay() {
         width * 2.0 / 4.0,
         height * 1.0 / 4.0,
         3,
-        width / 16.0,
+        radius,
         270.0,
         // 10.0,
         color,
@@ -191,7 +195,7 @@ fn draw_button_overlay() {
         width * 3.0 / 8.0,
         height * 1.0 / 8.0,
         width / 4.0,
-        width / 4.0,
+        height / 4.0,
         10.0,
         color,
     );
