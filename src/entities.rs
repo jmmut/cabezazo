@@ -1,6 +1,9 @@
 use crate::textures::Textures;
 use macroquad::prelude::*;
 
+const HITBOX_RADIUS: f32 = 0.90;
+const DEBUG_HITBOXES: bool = false;
+
 pub fn maybe_add_obstacles(
     runner_size: Vec2,
     obstacles: &mut Vec<Vec2>,
@@ -56,7 +59,7 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
 
     if is_key_down(KeyCode::Right)
         || touches_local().iter().any(|t| is_click_right(t.position))
-        ||  (is_mouse_button_down(MouseButton::Left) && is_click_right(mouse_position_local()))
+        || (is_mouse_button_down(MouseButton::Left) && is_click_right(mouse_position_local()))
     {
         runner_pos.x += 300.0 * delta;
     }
@@ -66,7 +69,7 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
 
     if is_key_down(KeyCode::Left)
         || touches_local().iter().any(|t| is_click_left(t.position))
-        ||  (is_mouse_button_down(MouseButton::Left) && is_click_left(mouse_position_local()))
+        || (is_mouse_button_down(MouseButton::Left) && is_click_left(mouse_position_local()))
     {
         runner_pos.x -= 300.0 * delta;
     }
@@ -88,6 +91,18 @@ pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i
         let flipped = frame_count / 20 % 2 == 0;
         params.flip_x = flipped;
         draw_texture_ex(*texture, obstacle.x, obstacle.y, WHITE, params);
+        maybe_debug_hitbox(obstacle, texture)
+    }
+}
+
+fn maybe_debug_hitbox(pos_top_left_corner: &Vec2, texture: &Texture2D) {
+    if DEBUG_HITBOXES {
+        draw_circle(
+            pos_top_left_corner.x + texture.width() / 2.0,
+            pos_top_left_corner.y + texture.height() / 2.0,
+            texture.width() / 2.0 * HITBOX_RADIUS,
+            Color::new(0.5, 0.5, 0.2, 0.5),
+        );
     }
 }
 
@@ -111,6 +126,11 @@ pub fn draw_runner(
     };
     draw_texture_ex(*texture, runner_pos.x, runner_pos.y, runner_color, params);
 
+    draw_stamina(runner_pos, stamina, texture);
+    maybe_debug_hitbox(runner_pos, texture);
+}
+
+fn draw_stamina(runner_pos: &Vec2, stamina: f32, texture: &Texture2D) {
     if stamina < 1.0 {
         let stamina_height: f32 = 20.0;
         draw_rectangle_lines(
@@ -131,8 +151,9 @@ pub fn draw_runner(
     }
 }
 
+/// Use Pythagoras for a circle hitbox
 pub fn did_collide(runner_pos: &Vec2, obstacles: &Vec<Vec2>, size: &Vec2) -> (bool, usize) {
-    let squared_diameter = size.x * size.x;
+    let squared_diameter = size.x * size.x * HITBOX_RADIUS * HITBOX_RADIUS;
     for (i, obstacle) in obstacles.iter().enumerate() {
         let distance_x = runner_pos.x - obstacle.x;
         let distance_y = runner_pos.y - obstacle.y;
