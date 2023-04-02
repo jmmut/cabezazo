@@ -55,7 +55,9 @@ async fn main() -> Result<(), FileError> {
             runner_pos.y = screen_height() - headbutt.pos() - runner_size.y;
             update_runner_pos(&mut runner_pos, right_limit, left_limit);
             obstacles_passed += update_obstacles_pos(&mut obstacles, bottom_limit);
-            previous_restart = false;
+            if is_mouse_button_released(MouseButton::Left) {
+                previous_restart = false;
+            }
         } else {
             if draw_game_over(runner_lives, obstacles_passed) {
                 runner_lives = 3;
@@ -144,56 +146,50 @@ fn draw_button_overlay() {
     let height = screen_height();
     let color = Color::new(0.2, 0.2, 0.2, 0.2);
     let radius = (width / 16.0).min(height / 16.0);
-    draw_poly(
-        width * 3.0 / 4.0,
-        height * 3.0 / 4.0,
-        3,
+
+    draw_move_button(
+        width,
+        height,
+        color,
         radius,
+        width * 6.0 / 8.0,
+        height * 6.0 / 8.0,
         0.0,
-        // 10.0,
-        color,
     );
-
-    draw_rectangle_lines(
-        width * 5.0 / 8.0,
-        height * 5.0 / 8.0,
-        width / 4.0,
-        height / 4.0,
-        10.0,
+    draw_move_button(
+        width,
+        height,
         color,
-    );
-
-    draw_poly(
-        width * 1.0 / 4.0,
-        height * 3.0 / 4.0,
-        3,
         radius,
+        width * 2.0 / 8.0,
+        height * 6.0 / 8.0,
         180.0,
-        // 10.0,
-        color,
     );
-
-    draw_rectangle_lines(
-        width * 1.0 / 8.0,
-        height * 5.0 / 8.0,
-        width / 4.0,
-        height / 4.0,
-        10.0,
+    draw_move_button(
+        width,
+        height,
         color,
-    );
-    draw_poly(
-        width * 2.0 / 4.0,
-        height * 1.0 / 4.0,
-        3,
         radius,
+        width * 4.0 / 8.0,
+        height * 2.0 / 8.0,
         270.0,
-        // 10.0,
-        color,
     );
+}
+
+fn draw_move_button(
+    width: f32,
+    height: f32,
+    color: Color,
+    radius: f32,
+    x: f32,
+    y: f32,
+    rotation: f32,
+) {
+    draw_poly(x, y, 3, radius, rotation, /* 10.0 ,*/ color);
 
     draw_rectangle_lines(
-        width * 3.0 / 8.0,
-        height * 1.0 / 8.0,
+        x - width * 1.0 / 8.0,
+        y - height * 1.0 / 8.0,
         width / 4.0,
         height / 4.0,
         10.0,
