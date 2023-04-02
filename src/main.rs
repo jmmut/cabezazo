@@ -88,6 +88,7 @@ async fn main() -> Result<(), FileError> {
             runner_lives,
             headbutt.stamina(),
         );
+        draw_button_overlay();
         next_frame().await
     }
     Ok(())
@@ -133,4 +134,65 @@ fn draw_game_over(runner_lives: i32, obstacles_passed: usize) -> bool {
         });
     }
     restart
+}
+
+fn draw_button_overlay() {
+    let width = screen_width();
+    let height = screen_height();
+    let color = Color::new(0.2, 0.2, 0.2, 0.2);
+    draw_poly(
+        width * 3.0 / 4.0,
+        height * 3.0 / 4.0,
+        3,
+        width / 16.0,
+        0.0,
+        // 10.0,
+        color,
+    );
+
+    draw_rectangle_lines(
+        width * 5.0 / 8.0,
+        height * 5.0 / 8.0,
+        width / 4.0,
+        width / 4.0,
+        10.0,
+        color,
+    );
+
+    draw_poly(
+        width * 1.0 / 4.0,
+        height * 3.0 / 4.0,
+        3,
+        width / 16.0,
+        180.0,
+        // 10.0,
+        color,
+    );
+
+    draw_rectangle_lines(
+        width * 1.0 / 8.0,
+        height * 5.0 / 8.0,
+        width / 4.0,
+        width / 4.0,
+        10.0,
+        color,
+    );
+    draw_poly(
+        width * 2.0 / 4.0,
+        height * 1.0 / 4.0,
+        3,
+        width / 16.0,
+        270.0,
+        // 10.0,
+        color,
+    );
+
+    draw_rectangle_lines(
+        width * 3.0 / 8.0,
+        height * 1.0 / 8.0,
+        width / 4.0,
+        width / 4.0,
+        10.0,
+        color,
+    );
 }

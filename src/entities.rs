@@ -40,13 +40,23 @@ pub fn update_obstacles_pos(obstacles: &mut Vec<Vec2>, bottom_limit: f32) -> usi
     obstacles_passed
 }
 
+fn is_click_right(pos_local: Vec2) -> bool {
+    pos_local.y >= 0.0 && pos_local.x >= 0.0
+}
+fn is_click_left(pos_local: Vec2) -> bool {
+    pos_local.y >= 0.0 && pos_local.x < 0.0
+}
+
+fn is_click_up(pos_local: Vec2) -> bool {
+    pos_local.y < 0.0
+}
+
 pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f32) {
     let delta = get_frame_time();
 
     if is_key_down(KeyCode::Right)
-        || touches_local()
-            .iter()
-            .any(|t| t.position.y >= 0.0 && t.position.x >= 0.0)
+        || touches_local().iter().any(|t| is_click_right(t.position))
+        ||  (is_mouse_button_down(MouseButton::Left) && is_click_right(mouse_position_local()))
     {
         runner_pos.x += 300.0 * delta;
     }
@@ -55,9 +65,8 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
     }
 
     if is_key_down(KeyCode::Left)
-        || touches_local()
-            .iter()
-            .any(|t| t.position.y >= 0.0 && t.position.x < 0.0)
+        || touches_local().iter().any(|t| is_click_left(t.position))
+        ||  (is_mouse_button_down(MouseButton::Left) && is_click_left(mouse_position_local()))
     {
         runner_pos.x -= 300.0 * delta;
     }
@@ -67,7 +76,10 @@ pub fn update_runner_pos(runner_pos: &mut Vec2, right_limit: f32, left_limit: f3
 }
 
 pub fn should_headbutt(collided: bool) -> bool {
-    !collided && (is_key_down(KeyCode::Up) || touches_local().iter().any(|t| t.position.y < 0.0))
+    !collided
+        && (is_key_down(KeyCode::Up)
+            || touches_local().iter().any(|t| is_click_up(t.position))
+            || (is_mouse_button_down(MouseButton::Left) && is_click_up(mouse_position_local())))
 }
 
 pub fn draw_obstacles(obstacles: &Vec<Vec2>, texture: &Texture2D, frame_count: i32) {
